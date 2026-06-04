@@ -10,6 +10,20 @@
   "upload_source_maps": true,
   "compatibility_flags": ["nodejs_compat"],
   /**
+   * Environment Variables
+   * https://developers.cloudflare.com/workers/wrangler/configuration/#environment-variables
+   * Note: Use secrets to store sensitive data.
+   * https://developers.cloudflare.com/workers/configuration/secrets/
+   */
+  /**
+   * Required Secrets for Authentication
+   * Generate with: node -e "const crypto = require('crypto'); const {publicKey, privateKey} = crypto.generateKeyPairSync('rsa', {modulusLength: 2048, publicExponent: 0x10001}); console.log(publicKey.export({format: 'pem', type: 'spki'}).toString()); console.log(privateKey.export({format: 'pem', type: 'pkcs8'}).toString());"
+   * Then add with:
+   *   wrangler secret put NYAA_PUBLIC_KEY_PEM
+   *   wrangler secret put NYAA_PRIVATE_KEY_PEM
+   */
+  // "vars": { "MY_VARIABLE": "production_value" }
+  /**
    * Smart Placement
    * https://developers.cloudflare.com/workers/configuration/smart-placement/#smart-placement
    */
@@ -20,13 +34,6 @@
    * databases, object storage, AI inference, real-time communication and more.
    * https://developers.cloudflare.com/workers/runtime-apis/bindings/
    */
-  /**
-   * Environment Variables
-   * https://developers.cloudflare.com/workers/wrangler/configuration/#environment-variables
-   * Note: Use secrets to store sensitive data.
-   * https://developers.cloudflare.com/workers/configuration/secrets/
-   */
-  // "vars": {  "MY_VARIABLE": "production_value" }
   /**
    * Static Assets
    * https://developers.cloudflare.com/workers/static-assets/binding/

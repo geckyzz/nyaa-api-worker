@@ -15,6 +15,106 @@ export function generateOpenAPISpec(baseUrl: string): OpenAPISchema {
       },
     ],
     paths: {
+      "/auth/public-key": {
+        get: {
+          summary: "Get RSA public key for encryption",
+          operationId: "getPublicKey",
+          responses: {
+            200: {
+              description: "Public key metadata",
+              content: {
+                "application/json": {
+                  schema: {
+                    type: "object",
+                    properties: {
+                      public_key: { type: "string" },
+                      algorithm: { type: "string" },
+                      padding: { type: "string" },
+                      encoding: { type: "string" },
+                    },
+                  },
+                },
+              },
+            },
+          },
+        },
+      },
+      "/auth/validate": {
+        get: {
+          summary: "Validate a session token",
+          operationId: "validateToken",
+          responses: {
+            200: { description: "Token is valid" },
+            401: { description: "Invalid or expired token" },
+          },
+        },
+      },
+      "/{site}/v1/auth/public-key": {
+        get: {
+          summary: "Get site-scoped RSA public key",
+          operationId: "getSitePublicKey",
+          parameters: [
+            {
+              name: "site",
+              in: "path",
+              required: true,
+              schema: { type: "string", enum: ["nyaa", "sukebei"] },
+            },
+          ],
+          responses: {
+            200: { description: "Public key metadata" },
+          },
+        },
+      },
+      "/{site}/v1/auth/validate": {
+        get: {
+          summary: "Validate a session token for a specific site",
+          operationId: "validateSiteToken",
+          parameters: [
+            {
+              name: "site",
+              in: "path",
+              required: true,
+              schema: { type: "string", enum: ["nyaa", "sukebei"] },
+            },
+          ],
+          responses: {
+            200: { description: "Token is valid" },
+            401: { description: "Invalid or expired token" },
+          },
+        },
+      },
+      "/{site}/v1/auth/whoami": {
+        get: {
+          summary: "Check currently logged-in user",
+          operationId: "getWhoami",
+          parameters: [
+            {
+              name: "site",
+              in: "path",
+              required: true,
+              schema: { type: "string", enum: ["nyaa", "sukebei"] },
+            },
+          ],
+          responses: {
+            200: {
+              description: "Currently logged-in username",
+              content: {
+                "application/json": {
+                  schema: {
+                    type: "object",
+                    properties: {
+                      username: { type: "string" },
+                      authenticated: { type: "boolean" },
+                    },
+                  },
+                },
+              },
+            },
+            401: { description: "Authentication required" },
+          },
+        },
+      },
       "/{site}/v1": {
         get: {
           summary: "Get main page torrents or search torrents",
