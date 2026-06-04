@@ -118,7 +118,6 @@ function parseTorrentRow(row: any, $: any): Torrent | null {
       infoHash,
       trusted: $(row).hasClass("success"),
       remake: $(row).hasClass("danger"),
-      anonymous: false,
     };
   } catch (error) {
     console.error("Error parsing torrent row:", error);

@@ -29,7 +29,6 @@ export interface Torrent {
   infoHash: string | null;
   trusted: boolean;
   remake: boolean;
-  anonymous: boolean;
 }
 
 export interface SearchResult {
