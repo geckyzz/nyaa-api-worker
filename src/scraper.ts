@@ -129,21 +129,27 @@ function parseTorrentRow(row: any, $: any): Torrent | null {
 async function fetchWithTimeout(
   url: string,
   timeout = FETCH_TIMEOUT,
+  session?: string,
 ): Promise<Response> {
   try {
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort(), timeout);
 
+    const headers: Record<string, string> = {
+      "User-Agent":
+        "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
+      Accept: "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
+      "Accept-Language": "en-US,en;q=0.5",
+    };
+
+    if (session) {
+      headers["Cookie"] = session;
+    }
+
     try {
       const response = await fetch(url, {
         signal: controller.signal,
-        headers: {
-          "User-Agent":
-            "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
-          Accept:
-            "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
-          "Accept-Language": "en-US,en;q=0.5",
-        },
+        headers,
       });
       clearTimeout(timeoutId);
       return response;
@@ -159,7 +165,14 @@ async function fetchWithTimeout(
 export async function searchTorrents(
   site: "nyaa" | "sukebei",
   query: string,
-  options: { p?: number; c?: string; f?: string; s?: string; o?: string } = {},
+  options: {
+    p?: number;
+    c?: string;
+    f?: string;
+    s?: string;
+    o?: string;
+    session?: string;
+  } = {},
 ): Promise<SearchResult> {
   try {
     const siteBase = getSiteBase(site);
@@ -173,7 +186,11 @@ export async function searchTorrents(
     if (options.o) url.searchParams.set("o", options.o);
 
     console.log(`[Search] Fetching: ${url.toString()}`);
-    const response = await fetchWithTimeout(url.toString());
+    const response = await fetchWithTimeout(
+      url.toString(),
+      FETCH_TIMEOUT,
+      options.session,
+    );
 
     if (!response.ok) {
       console.error(`[Search] HTTP ${response.status} from ${url.toString()}`);
@@ -255,13 +272,14 @@ export async function searchTorrents(
 export async function getTorrentDetail(
   site: "nyaa" | "sukebei",
   torrentId: number,
+  session?: string,
 ): Promise<TorrentDetail | null> {
   try {
     const siteBase = getSiteBase(site);
     const url = `${siteBase}/view/${torrentId}`;
 
     console.log(`[Detail] Fetching: ${url}`);
-    const response = await fetchWithTimeout(url);
+    const response = await fetchWithTimeout(url, FETCH_TIMEOUT, session);
     if (!response.ok) {
       console.error(`[Detail] HTTP ${response.status}`);
       return null;
@@ -447,13 +465,14 @@ function parseFileNode(li: any, $: any): FileNode {
 export async function getUserInfo(
   site: "nyaa" | "sukebei",
   userId: number,
+  session?: string,
 ): Promise<User | null> {
   try {
     const siteBase = getSiteBase(site);
     const url = `${siteBase}/user/${userId}`;
 
     console.log(`[UserInfo] Fetching: ${url}`);
-    const response = await fetchWithTimeout(url);
+    const response = await fetchWithTimeout(url, FETCH_TIMEOUT, session);
     if (!response.ok) {
       console.error(`[UserInfo] HTTP ${response.status}`);
       return null;
@@ -485,13 +504,14 @@ export async function getUserInfo(
 export async function getUserByUsername(
   site: "nyaa" | "sukebei",
   username: string,
+  session?: string,
 ): Promise<User | null> {
   try {
     const siteBase = getSiteBase(site);
     const url = `${siteBase}/user/${encodeURIComponent(username)}`;
 
     console.log(`[UserUsername] Fetching: ${url}`);
-    const response = await fetchWithTimeout(url);
+    const response = await fetchWithTimeout(url, FETCH_TIMEOUT, session);
     if (!response.ok) {
       console.error(`[UserUsername] HTTP ${response.status}`);
       return null;
@@ -523,7 +543,7 @@ export async function getUserByUsername(
 export async function getUserUploads(
   site: "nyaa" | "sukebei",
   userSelector: number | string,
-  options: { p?: number; s?: string; o?: string } = {},
+  options: { p?: number; s?: string; o?: string; session?: string } = {},
 ): Promise<SearchResult> {
   try {
     const siteBase = getSiteBase(site);
@@ -534,7 +554,11 @@ export async function getUserUploads(
     if (options.o) url.searchParams.set("o", options.o);
 
     console.log(`[UserUploads] Fetching: ${url.toString()}`);
-    const response = await fetchWithTimeout(url.toString());
+    const response = await fetchWithTimeout(
+      url.toString(),
+      FETCH_TIMEOUT,
+      options.session,
+    );
     if (!response.ok) {
       console.error(`[UserUploads] HTTP ${response.status}`);
       return {
@@ -615,6 +639,51 @@ function parsePagination(
   };
 }
 
+function parseWhoami($: any): string | null {
+  // Select the username from the navbar dropdown
+  // The structure is: <ul class="nav navbar-nav navbar-right"> ... <a class="dropdown-toggle" ...> <i ...></i> USERNAME <span class="caret"></span> </a>
+  const dropdownLink = $(".navbar-right .dropdown-toggle");
+  if (dropdownLink.length === 0) return null;
+
+  // We want to find the link that contains the user icon
+  const userLink = dropdownLink.filter((_: any, el: any) => {
+    return $(el).find("i.fa-user").length > 0;
+  });
+
+  if (userLink.length === 0) return null;
+
+  // Clone to avoid modifying original, then remove icons/carets to get clean text
+  const cloned = userLink.clone();
+  cloned.find("i, span").remove();
+  const username = cloned.text().trim();
+
+  return username || null;
+}
+
+export async function getWhoami(
+  site: "nyaa" | "sukebei",
+  session?: string,
+): Promise<string | null> {
+  if (!session) return null;
+
+  try {
+    const siteBase = getSiteBase(site);
+    console.log(`[Whoami] Fetching: ${siteBase}`);
+    const response = await fetchWithTimeout(siteBase, FETCH_TIMEOUT, session);
+    if (!response.ok) {
+      console.error(`[Whoami] HTTP ${response.status}`);
+      return null;
+    }
+
+    const html = await response.text();
+    const $ = load(html);
+    return parseWhoami($);
+  } catch (error) {
+    console.error("[Whoami] Error:", error);
+    return null;
+  }
+}
+
 function torrentsCount($: any): number {
   // Fallback count based on visible rows
   return $(".torrent-list tbody tr").length;
@@ -622,12 +691,13 @@ function torrentsCount($: any): number {
 
 export async function getMainPageTorrents(
   site: "nyaa" | "sukebei",
+  session?: string,
 ): Promise<Torrent[]> {
   try {
     const siteBase = getSiteBase(site);
 
     console.log(`[MainPage] Fetching: ${siteBase}`);
-    const response = await fetchWithTimeout(siteBase);
+    const response = await fetchWithTimeout(siteBase, FETCH_TIMEOUT, session);
     if (!response.ok) {
       console.error(`[MainPage] HTTP ${response.status}`);
       return [];
