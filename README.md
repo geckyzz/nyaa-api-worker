@@ -178,7 +178,10 @@ see LICENSE file.
 
 ## testing
 
-the project uses `vitest` with the Cloudflare Workers pool for testing... although, it might not be properly implemented, yet.
+the project uses `vitest` with the Cloudflare Workers pool for testing.
+
+- **unit tests:** covers core authentication logic and RSA-4096 token decryption.
+- **integration tests:** covers worker request handling, routing, and OpenAPI delivery.
 
 - run all tests: `npm test`
 - run tests in watch mode: `npx vitest dev`
