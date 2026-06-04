@@ -55,16 +55,20 @@ describe("Authentication Logic", () => {
     const payload = `session::::${expiresAt}::::${sessionValue}`;
     const encrypted = publicEncrypt(
       { key: publicKey, padding: constants.RSA_PKCS1_OAEP_PADDING },
-      Buffer.from(payload)
+      Buffer.from(payload),
     );
     const token = encrypted.toString("base64");
 
     // Simulate getSessionFromToken logic
     const decrypted = decryptSessionToken(token, privateKey);
-    const sessionCookie = decrypted?.cookie ? `session=${decrypted.cookie}` : undefined;
+    const sessionCookie = decrypted?.cookie
+      ? `session=${decrypted.cookie}`
+      : undefined;
     const requestCookies = "__ddg1_=val1; __ddg8_=val2";
-    
+
     const combined = [sessionCookie, requestCookies].filter(Boolean).join("; ");
-    expect(combined).toBe(`session=${sessionValue}; __ddg1_=val1; __ddg8_=val2`);
+    expect(combined).toBe(
+      `session=${sessionValue}; __ddg1_=val1; __ddg8_=val2`,
+    );
   });
 });

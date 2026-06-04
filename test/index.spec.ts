@@ -15,7 +15,7 @@ describe("Nyaa API Worker", () => {
     const keys = generateKeyPair();
     publicKey = keys.publicKey;
     privateKey = keys.privateKey;
-    
+
     // Set environment variables for the test
     (env as any).NYAA_PUBLIC_KEY_PEM = publicKey;
     (env as any).NYAA_PRIVATE_KEY_PEM = privateKey;
@@ -26,9 +26,9 @@ describe("Nyaa API Worker", () => {
     const ctx = createExecutionContext();
     const response = await worker.fetch(request, env, ctx);
     await waitOnExecutionContext(ctx);
-    
+
     expect(response.status).toBe(200);
-    const data = await response.json() as any;
+    const data = (await response.json()) as any;
     expect(data.openapi).toBe("3.0.0");
     expect(data.info.title).toBe("Nyaa REST API");
   });
@@ -38,9 +38,9 @@ describe("Nyaa API Worker", () => {
     const ctx = createExecutionContext();
     const response = await worker.fetch(request, env, ctx);
     await waitOnExecutionContext(ctx);
-    
+
     expect(response.status).toBe(200);
-    const data = await response.json() as any;
+    const data = (await response.json()) as any;
     expect(data.public_key).toContain("BEGIN PUBLIC KEY");
     expect(data.algorithm).toBe("RSA-4096");
   });
@@ -52,9 +52,11 @@ describe("Nyaa API Worker", () => {
     const ctx = createExecutionContext();
     const response = await worker.fetch(request, env, ctx);
     await waitOnExecutionContext(ctx);
-    
+
     expect(response.status).toBe(204);
-    expect(response.headers.get("Access-Control-Allow-Methods")).toContain("GET");
+    expect(response.headers.get("Access-Control-Allow-Methods")).toContain(
+      "GET",
+    );
   });
 
   it("should return 404 for unknown routes", async () => {
@@ -62,7 +64,7 @@ describe("Nyaa API Worker", () => {
     const ctx = createExecutionContext();
     const response = await worker.fetch(request, env, ctx);
     await waitOnExecutionContext(ctx);
-    
+
     expect(response.status).toBe(404);
   });
 });
