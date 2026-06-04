@@ -1,6 +1,7 @@
 {
   "name": "nyaa-api-worker",
   "version": "0.1.0",
+  "type": "module",
   "private": true,
   "scripts": {
     "deploy": "wrangler deploy",
