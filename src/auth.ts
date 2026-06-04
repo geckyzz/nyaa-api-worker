@@ -1,4 +1,9 @@
-import { privateDecrypt, generateKeyPairSync, constants } from "crypto";
+import {
+  privateDecrypt,
+  publicEncrypt,
+  generateKeyPairSync,
+  constants,
+} from "crypto";
 
 export interface DecryptedSession {
   cookie: string;
