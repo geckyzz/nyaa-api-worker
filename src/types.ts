@@ -2,6 +2,9 @@ export interface NyaaRequest {
   url: string;
   method: string;
   headers: Record<string, string>;
+  body?: string | ArrayBuffer;
+  nyaaSession?: string;
+  site?: "nyaa" | "sukebei";
 }
 
 export interface NyaaResponse {

@@ -11,7 +11,6 @@ export default async function handler(req: Request) {
   const response = await handleRequest(req, origin, process.env);
 
   return new Response(response.body, {
-
     status: response.status,
     headers: response.headers,
   });
