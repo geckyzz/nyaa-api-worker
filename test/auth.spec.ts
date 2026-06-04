@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { decryptSessionToken, generateKeyPair } from "../src/auth";
+import { decryptSessionToken, generateKeyPair } from "../src/auth.js";
 import { publicEncrypt, constants } from "crypto";
 
 describe("Authentication Logic", () => {

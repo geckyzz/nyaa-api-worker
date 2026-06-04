@@ -4,8 +4,8 @@ import {
   waitOnExecutionContext,
 } from "cloudflare:test";
 import { describe, it, expect, beforeAll } from "vitest";
-import worker from "../src/index";
-import { generateKeyPair } from "../src/auth";
+import worker from "../src/index.js";
+import { generateKeyPair } from "../src/auth.js";
 
 describe("Nyaa API Worker", () => {
   let publicKey: string;

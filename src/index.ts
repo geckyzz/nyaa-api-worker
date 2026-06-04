@@ -1,4 +1,4 @@
-import { handleRequest } from "./router";
+import { handleRequest } from "./router.js";
 
 export default {
   async fetch(

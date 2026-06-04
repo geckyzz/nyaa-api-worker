@@ -1,4 +1,4 @@
-import type { NyaaRequest, NyaaResponse } from "./types";
+import type { NyaaRequest, NyaaResponse } from "./types.js";
 import {
   searchTorrents,
   getTorrentDetail,
@@ -7,9 +7,9 @@ import {
   getUserUploads,
   getMainPageTorrents,
   getWhoami,
-} from "./scraper";
-import { generateOpenAPISpec } from "./openapi";
-import { decryptSessionToken } from "./auth";
+} from "./scraper.js";
+import { generateOpenAPISpec } from "./openapi.js";
+import { decryptSessionToken } from "./auth.js";
 
 // Normalize PEM keys to handle:
 // 1. Escaped newlines (\n in env vars) -> actual newlines

@@ -6,7 +6,7 @@ import type {
   User,
   Comment,
   FileNode,
-} from "./types";
+} from "./types.js";
 
 const NYAA_BASE = "https://nyaa.si";
 const SUKEBEI_BASE = "https://sukebei.nyaa.si";

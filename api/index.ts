@@ -1,4 +1,4 @@
-import { handleRequest } from "../src/router";
+import { handleRequest } from "../src/router.js";
 
 export const config = {
   runtime: "nodejs",

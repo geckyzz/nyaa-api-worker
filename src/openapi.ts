@@ -1,4 +1,4 @@
-import type { OpenAPISchema } from "./types";
+import type { OpenAPISchema } from "./types.js";
 
 export function generateOpenAPISpec(baseUrl: string): OpenAPISchema {
   return {
