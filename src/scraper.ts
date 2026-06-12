@@ -20,6 +20,10 @@ function cleanText(text: string | undefined): string {
   return (text || "").trim().replace(/\s+/g, " ");
 }
 
+function cleanMultilineText(text: string | undefined): string {
+  return (text || "").trim().replace(/\r\n/g, "\n");
+}
+
 function extractBTIH(magnetLink: string): string | null {
   const match = magnetLink.match(/btih:([a-fA-F0-9]+)/i);
   return match ? match[1].toLowerCase() : null;
@@ -354,7 +358,7 @@ function parseTorrentDetail(
     const leechers = parseInt(metadata["Leechers"] || "0") || 0;
     const downloads = parseInt(metadata["Completed"] || "0") || 0;
 
-    const description = cleanText($("#torrent-description").text());
+    const description = cleanMultilineText($("#torrent-description").text());
 
     const comments: Comment[] = [];
     $(".comment-panel").each((idx, panel) => {
@@ -362,7 +366,7 @@ function parseTorrentDetail(
       const username = cleanText(usernameElem.text());
 
       const contentElem = $(panel).find(".comment-content");
-      const text = cleanText(contentElem.text());
+      const text = cleanMultilineText(contentElem.text());
 
       const timestampElem = $(panel).find("[data-timestamp]");
       const timestampRaw = timestampElem.attr("data-timestamp");
