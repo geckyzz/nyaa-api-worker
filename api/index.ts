@@ -6,7 +6,8 @@ export const config = {
 
 async function unifiedHandler(req: any) {
   // Normalize headers (supports both Web Headers and Node.js plain object)
-  const headers = req.headers instanceof Headers ? req.headers : new Headers(req.headers);
+  const headers =
+    req.headers instanceof Headers ? req.headers : new Headers(req.headers);
 
   // Reconstruct absolute URL
   const host = headers.get("host") || "localhost";
@@ -14,15 +15,20 @@ async function unifiedHandler(req: any) {
   const baseUrl = `${protocol}://${host}`;
 
   // In Node.js runtime, req.url might be relative
-  const fullUrl = req.url.startsWith("http") ? req.url : new URL(req.url, baseUrl).toString();
+  const fullUrl = req.url.startsWith("http")
+    ? req.url
+    : new URL(req.url, baseUrl).toString();
   const url = new URL(fullUrl);
   const origin = url.origin;
 
   // Construct a standard Web Request if necessary for handleRequest
-  const webReq = req instanceof Request ? req : new Request(fullUrl, {
-    method: req.method,
-    headers: headers,
-  });
+  const webReq =
+    req instanceof Request
+      ? req
+      : new Request(fullUrl, {
+          method: req.method,
+          headers: headers,
+        });
 
   const response = await handleRequest(webReq, origin, process.env);
 
@@ -38,4 +44,3 @@ export const OPTIONS = unifiedHandler;
 export const PUT = unifiedHandler;
 export const DELETE = unifiedHandler;
 export const PATCH = unifiedHandler;
-

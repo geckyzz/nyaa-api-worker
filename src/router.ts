@@ -236,6 +236,7 @@ addRoute(/^\/([a-z]+)\/v1\/?$/, "GET", async (req, match, origin, env) => {
   const session = await getSessionFromToken(req, env);
   const url = new URL(req.url, origin);
   const query = url.searchParams.get("q");
+  const less = url.searchParams.get("less") === "true";
 
   if (
     query ||
@@ -260,12 +261,15 @@ addRoute(/^\/([a-z]+)\/v1\/?$/, "GET", async (req, match, origin, env) => {
       o,
       session,
     });
+    if (less) {
+      result.torrents = formatTorrents(result.torrents, true) as any;
+    }
     return jsonResponse(result);
   }
 
   const torrents = await getMainPageTorrents(site, session);
   return jsonResponse({
-    torrents,
+    torrents: formatTorrents(torrents, less),
     pagination: {
       currentPage: 1,
       totalPages: 1,
@@ -332,6 +336,7 @@ addRoute(
     const session = await getSessionFromToken(req, env);
     const url = new URL(req.url, origin);
     const uploadsParam = url.searchParams.get("uploads");
+    const less = url.searchParams.get("less") === "true";
 
     if (uploadsParam === "true") {
       const p = url.searchParams.get("p")
@@ -340,6 +345,9 @@ addRoute(
       const s = url.searchParams.get("s") || undefined;
       const o = url.searchParams.get("o") || undefined;
       const result = await getUserUploads(site, userId, { p, s, o, session });
+      if (less) {
+        result.torrents = formatTorrents(result.torrents, true) as any;
+      }
       return jsonResponse(result);
     }
 
@@ -373,8 +381,12 @@ addRoute(
       : undefined;
     const s = url.searchParams.get("s") || undefined;
     const o = url.searchParams.get("o") || undefined;
+    const less = url.searchParams.get("less") === "true";
 
     const result = await getUserUploads(site, userParam, { p, s, o, session });
+    if (less) {
+      result.torrents = formatTorrents(result.torrents, true) as any;
+    }
     return jsonResponse(result);
   },
 );
@@ -428,6 +440,23 @@ addRoute(/^\/([a-z]+)\/v1\/openapi\/?$/, "GET", async (req, match, origin) => {
 });
 
 // Helper functions
+function formatTorrents(torrents: any[], less: boolean) {
+  if (!less) return torrents;
+  return torrents.map((t) => ({
+    id: t.id,
+    name: t.name,
+    category: t.category,
+    subcategory: t.subcategory,
+    comments: t.comments,
+    uploadDate: t.uploadDate,
+    size: t.size,
+    seeders: t.seeders,
+    leechers: t.leechers,
+    downloads: t.downloads,
+    infoHash: t.infoHash,
+  }));
+}
+
 function jsonResponse(data: any, status = 200): NyaaResponse {
   return {
     status,
