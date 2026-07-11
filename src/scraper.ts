@@ -622,10 +622,16 @@ function parsePagination(
   }
 
   const activePage = parseInt(paginationElem.find(".active").text()) || 1;
-  const lastPageElem = paginationElem
-    .find("li:not(.next):not(.previous)")
-    .last();
-  const totalPages = parseInt(lastPageElem.text()) || activePage;
+  const pageNumbers: number[] = [];
+  paginationElem.find("li a").each((_: number, el: any) => {
+    const txt = $(el).text().trim();
+    const num = parseInt(txt);
+    if (!isNaN(num)) {
+      pageNumbers.push(num);
+    }
+  });
+  const totalPages =
+    pageNumbers.length > 0 ? Math.max(...pageNumbers) : activePage;
 
   if (totalResults === 0) {
     const titleText = cleanText($("h3").first().text());
